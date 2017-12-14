@@ -70,8 +70,17 @@ export function ensureCurrentMetaSchema (migrator) {
   const queryInterface = migrator.options.storageOptions.sequelize.getQueryInterface();
   const tableName = migrator.options.storageOptions.tableName;
   const columnName = migrator.options.storageOptions.columnName;
-
-  return ensureMetaTable(queryInterface, tableName)
+  const schema = migrator.options.storageOptions.schema;
+  
+  const promise = Promise.resolve();
+  if (schema) {
+    promise.then(function() {
+      return queryInterface.createSchema(schema);
+    });
+  }
+  return promise.then(function() {
+    return ensureMetaTable(queryInterface, tableName);
+  })
     .then(table => {
       const columns = Object.keys(table);
 
